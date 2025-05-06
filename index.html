@@ -2,110 +2,73 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI 投資顧問聊天室（反詐體驗版）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; margin: 0; background: #f2f2f2; padding: 0; }
-    header, footer { background: #003366; color: white; text-align: center; padding: 20px; }
-    .container { max-width: 800px; margin: 30px auto; padding: 20px; background: white; border-radius: 10px; }
-    .chat-box { border: 1px solid #ccc; border-radius: 5px; padding: 10px; height: 300px; overflow-y: scroll; background: #fafafa; }
-    .chat-entry { margin: 10px 0; }
-    .user { color: #0074D9; }
-    .bot { color: #FF4136; }
-    input[type=text], input[type=password], input[type=number] { width: 90%; padding: 8px; margin: 5px 0; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    .form-box { margin-top: 30px; padding: 20px; background: #ffe; border: 1px solid #ccc; border-radius: 5px; }
-    .small { font-size: 0.9em; color: #888; }
+    body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+    .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { color: #002f5f; text-align: center; }
+    .warning { color: #555; font-size: 14px; text-align: center; margin-bottom: 10px; }
+    .chat-box { border: 1px solid #ccc; border-radius: 5px; padding: 10px; height: 300px; overflow-y: auto; margin-bottom: 10px; background: #fafafa; }
+    .chat-line { margin: 5px 0; }
+    .chat-line.user { color: #003366; }
+    .chat-line.bot { color: #cc0000; }
+    .input-area { display: flex; }
+    .input-area input { flex: 1; padding: 10px; font-size: 16px; }
+    .input-area button { padding: 10px 20px; font-size: 16px; background: #002f5f; color: white; border: none; cursor: pointer; }
+    .form-area { background: #ffffcc; padding: 10px; border-radius: 5px; margin-top: 20px; }
+    .form-area input { display: block; margin: 5px 0; padding: 5px; width: 100%; }
+    footer { text-align: center; font-size: 12px; margin-top: 20px; color: #999; }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>AI 投資顧問聊天室（反詐體驗版）</h1>
+    <div class="warning">⚠️ 教育模擬用途，請勿輸入真實個資</div>
+    <div class="chat-box" id="chat-box">
+      <div class="chat-line bot">老師：您好！我是您的專屬投資顧問，目前有一個內部 VIP 快閃專案，您有興趣了解嗎？</div>
+    </div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="輸入你的訊息…" />
+      <button onclick="sendMessage()">送出</button>
+    </div>
 
-<header>
-  <h1>AI 投資顧問聊天室（反詐體驗版）</h1>
-  <p>⚠️ 教育模擬用途，請勿輸入真實個資</p>
-</header>
+    <div class="form-area">
+      <strong>模擬轉帳區</strong><br>
+      請填寫以下資料完成升級 VIP 並領獲利：<br>
+      <input placeholder="帳戶名稱"/>
+      <input placeholder="帳戶號碼"/>
+      <input placeholder="轉出金額"/>
+      <input placeholder="銀行密碼" type="password"/>
+      <button onclick="triggerScam()">確認轉帳</button>
+    </div>
 
-<div class="container">
-  <div class="chat-box" id="chat-box">
-    <div class="chat-entry bot"><strong>老師：</strong> 您好！我是您的專屬投資顧問老師，目前有一個內部 VIP 快閃專案，您有興趣了解嗎？</div>
+    <footer>© 教育模擬｜反詐體驗計畫</footer>
   </div>
-  <input type="text" id="user-input" placeholder="輸入你的訊息..." />
-  <button onclick="sendMessage()">送出</button>
 
-  <div class="form-box">
-    <h3>模擬轉帳區</h3>
-    <p>請填寫以下資料完成升級 VIP 並提領獲利：</p>
-    <input type="text" placeholder="銀行帳號" /><br>
-    <input type="number" placeholder="轉帳金額 (NT$)" /><br>
-    <input type="password" placeholder="網銀密碼" /><br>
-    <button onclick="showScamAlert()">立即轉帳</button>
-  </div>
-
-  <p class="small">本系統為反詐體驗模擬，不會實際傳送資料。</p>
-</div>
-
-<footer>
-  &copy; 教育模擬｜反詐體驗計畫
-</footer>
-
-<script>
-  const chatBox = document.getElementById("chat-box");
-
-  async function sendMessage() {
-    const input = document.getElementById("user-input");
-    const message = input.value.trim();
-    if (!message) return;
-    appendMessage("你", message, "user");
-    input.value = "";
-
-    const reply = await fetchGPTReply(message);
-    appendMessage("老師", reply, "bot");
-  }
-
-  function appendMessage(sender, text, cls) {
-    const entry = document.createElement("div");
-    entry.className = `chat-entry ${cls}`;
-    entry.innerHTML = `<strong>${sender}：</strong> ${text}`;
-    chatBox.appendChild(entry);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  async function fetchGPTReply(userMessage) {
-    try {
-      const response = await fetch("https://proxy.gptdemo.tw/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            { role: "system", content: "你是一位語氣親切、自信穩健的『投資顧問老師』，你的任務是讓使用者相信你提供的投資機會可以獲利，並逐步引導他們投入更多資金。請用令人安心的語氣回應，並根據對方的問題給出專業建議。" },
-            { role: "user", content: userMessage }
-          ]
-        })
-      });
-      const data = await response.json();
-      return data.reply || "（老師暫時無回應，請稍後再試）";
-    } catch (err) {
-      return "⚠️ 系統錯誤或 Proxy 未連線，請稍後再試。";
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (!message) return;
+      chatBox.innerHTML += `<div class="chat-line user">你：${message}</div>`;
+      input.value = '';
+      setTimeout(() => {
+        chatBox.innerHTML += `<div class="chat-line bot">老師：這波專案保證獲利，轉入門檻只要一萬，名額有限，馬上幫你保留！</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 800);
     }
-  }
 
-  function showScamAlert() {
-    alert("⚠️ 你已經被騙了！
+    function triggerScam() {
+      alert("⚠️ 你已經被騙了！
 
-這是一個典型的投資詐騙手法，利用『免費體驗』與『保證獲利』誘騙你轉帳開通 VIP，實際上是詐騙集團常見伎倆。
+這是模擬詐騙體驗，請保持警覺，不要對陌生投資顧問透露個資。
 
-✅ 切記：
-1. 任何需先匯款才能提領的都是詐騙
-2. 投資前請查證平台是否合法
-3. 如有疑慮，請撥打 165 反詐騙專線
-
-👉 是否前往下一階段：『識詐學院』繼續體驗？");
-    if (confirm("前往識詐學院（反詐教學頁面）？")) {
-      window.location.href = "https://165.npa.gov.tw/#/"; // or any custom anti-fraud page
+📞 如遇疑似詐騙請撥打 165 反詐騙專線。");
+      window.open("https://165.npa.gov.tw", "_blank");
     }
-  }
-</script>
-
+  </script>
 </body>
 </html>
